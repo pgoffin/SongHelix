@@ -19,7 +19,7 @@ except ImportError:
     flags = None
 
 config = configparser.ConfigParser()
-config.read('instances/config.py')
+config.read('instances/config.ini')
 
 # Code is based on this https://developers.google.com/sheets/api/quickstart/python
 
