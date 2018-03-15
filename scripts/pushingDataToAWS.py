@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     cursor = conn.cursor()
 
-    songdataJSON = 'songHelixData_testing.json'
+    songdataJSON = 'songHelixData_v0314.json'
     dataDirectory = './data'
     filePath = os.path.join(dataDirectory, songdataJSON)
 
@@ -96,6 +96,8 @@ if __name__ == '__main__':
     #                "contributor CHAR(100),"
     #                "orderID CHAR(50)"
     #                ")")
+
+    cursor.execute("DROP TABLE composers, songs, features, keywords, mappingFeatureToSong, mappingKeywordToSong")
 
     cursor.execute("CREATE TABLE composers("
                    "id SERIAL PRIMARY KEY,"
@@ -202,7 +204,7 @@ if __name__ == '__main__':
 
         print(aSong)
 
-        # composer table
+        # COMPOSER table
         aComposer = 'null'
         theComposer = 'Composer'
         if theComposer in aSong:
@@ -223,7 +225,7 @@ if __name__ == '__main__':
         else:
             returnedComposerID = ids[0]
 
-        # song table
+        # SONG table
         insertStatement = []
         for aMapping in mappingDBColumnToJSONKeys:
             theValue = list(aMapping.values())[0]
@@ -242,9 +244,11 @@ if __name__ == '__main__':
         insertTuple = tuple(insertStatement)
         print(insertTuple)
 
+        returnedSongID = None
         # no Feature and Keyword values in this table
-        sql = "INSERT INTO songs(song_title,composer_id,poet_or_lyricist,larger_Work_original_publication,poets_associated_movements_or_isms_or_groups,musical_form,first_line,year_of_composition,catalog_designation,complete_edition_reference,composer_place_of_birth,original_language,voice_part_suggested_by_the_composer,Berton_Coffin_suggested_voice_type,Berton_Coffin_suggested_song_type,piano_and_voice_only,orchestra_and_voice,other_instrumentation_and_voice,more_than_one_voice,original_key,range_in_original_key,dedicated_to,premiered_by,commissioned_by,average_duration,degrees_location_relationship_occupation,recommended_printed_source,recommended_translation_source,score_source,audio_source,other_musical_allusions_accompaniment_figures,contributor,orderID) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        cursor.execute(sql, insertTuple)
+        sql_song = "INSERT INTO songs(song_title,composer_id,poet_or_lyricist,larger_Work_original_publication,poets_associated_movements_or_isms_or_groups,musical_form,first_line,year_of_composition,catalog_designation,complete_edition_reference,composer_place_of_birth,original_language,voice_part_suggested_by_the_composer,Berton_Coffin_suggested_voice_type,Berton_Coffin_suggested_song_type,piano_and_voice_only,orchestra_and_voice,other_instrumentation_and_voice,more_than_one_voice,original_key,range_in_original_key,dedicated_to,premiered_by,commissioned_by,average_duration,degrees_location_relationship_occupation,recommended_printed_source,recommended_translation_source,score_source,audio_source,other_musical_allusions_accompaniment_figures,contributor,orderID) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id"
+        cursor.execute(sql_song, insertTuple)
+        returnedSongID = cursor.fetchone()[0]
 
         # feature table
         aFeature = 'null'
@@ -276,15 +280,24 @@ if __name__ == '__main__':
 
                 featureIDs.append(returnedFeatureID)
 
+            # MAPPINGFEATURETOSONG table
+            for aFeatureID in featureIDs:
+                sql_mappingFeatureToSong = "INSERT INTO mappingFeatureToSong(song_id, feature_id) VALUES (%s,%s);"
+
+                insertTuple_oneMapFeatureToSong = (returnedSongID, aFeatureID)
+                cursor.execute(sql_mappingFeatureToSong, insertTuple_oneMapFeatureToSong)
+                print('inserted features: ' + sql_mappingFeatureToSong)
+                print(insertTuple_oneMapFeatureToSong)
+
         # keywords table
-        aKeyword = 'null'
+        allKeywords = 'null'
         theKeyword = 'Keywords'
         if theKeyword in aSong:
-            aKeyword = aSong.get(theKeyword)
+            allKeywords = aSong.get(theKeyword)
 
         # split the features into single Words
-        if aKeyword != 'null':
-            allKeywords = [keyword.strip() for keyword in aKeyword.split(';')]
+        if allKeywords != 'null':
+            allKeywords = [keyword.strip() for keyword in allKeywords.split(';')]
 
             keywordIDs = []
             for oneKeyword in allKeywords:
@@ -306,6 +319,15 @@ if __name__ == '__main__':
 
                 keywordIDs.append(returnedKeywordID)
 
-    conn.commit()
+            # MAPPINGKEYWORDTOSONG table
+            for aKeywordID in keywordIDs:
+                sql_mappingKeywordToSong = "INSERT INTO mappingKeywordToSong(song_id, keyword_id) VALUES (%s,%s);"
+
+                insertTuple_oneMapKeywordToSong = (returnedSongID, aKeywordID)
+                cursor.execute(sql_mappingKeywordToSong, insertTuple_oneMapKeywordToSong)
+                print('inserted keyword: ' + sql_mappingKeywordToSong)
+                print(insertTuple_oneMapKeywordToSong)
+
+        conn.commit()
 
     seeDataInDB(cursor)
