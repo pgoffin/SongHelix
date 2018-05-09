@@ -52,52 +52,13 @@ if __name__ == '__main__':
 
     cursor = conn.cursor()
 
-    songdataJSON = 'songHelixData_v0314.json'
+    songdataJSON = 'songHelixData_v0410.json'
     dataDirectory = './data'
     filePath = os.path.join(dataDirectory, songdataJSON)
 
     songdata = readFromJSONFile(filePath)
 
-    # cursor.execute("CREATE TABLE songs("
-    #                "ID INT PRIMARY KEY NOT NULL,"
-    #                "song_title CHAR(100) NOT NULL,"
-    #                "composer CHAR(100),"
-    #                "poet_or_lyricist CHAR(100),"
-    #                "features TEXT,"
-    #                "keywords TEXT,"
-    #                "larger_Work_original_publication TEXT,"
-    #                "poets_associated_movements_or_isms_or_groups TEXT,"
-    #                "musical_form TEXT,"
-    #                "first_line TEXT,"
-    #                "year_of_composition CHAR(50),"
-    #                "catalog_designation TEXT,"
-    #                "complete_edition_reference TEXT,"
-    #                "composer_place_of_birth CHAR(100),"
-    #                "original_language CHAR(100),"
-    #                "voice_part_suggested_by_the_composer TEXT,"
-    #                "Berton_Coffin_suggested_voice_type TEXT,"
-    #                "Berton_Coffin_suggested_song_type TEXT,"
-    #                "piano_and_voice_only CHAR(100),"
-    #                "orchestra_and_voice CHAR(100),"
-    #                "other_instrumentation_and_voice TEXT,"
-    #                "more_than_one_voice TEXT,"
-    #                "original_key TEXT,"
-    #                "range_in_original_key TEXT,"
-    #                "dedicated_to CHAR(100),"
-    #                "premiered_by CHAR(100),"
-    #                "commissioned_by CHAR(100),"
-    #                "average_duration CHAR(50),"
-    #                "degrees_location_relationship_occupation TEXT,"
-    #                "recommended_printed_source TEXT,"
-    #                "recommended_translation_source TEXT,"
-    #                "score_source TEXT,"
-    #                "audio_source TEXT,"
-    #                "other_musical_allusions_accompaniment_figures TEXT,"
-    #                "contributor CHAR(100),"
-    #                "orderID CHAR(50)"
-    #                ")")
-
-    cursor.execute("DROP TABLE composers, songs, features, keywords, mappingFeatureToSong, mappingKeywordToSong")
+    # cursor.execute("DROP TABLE composers, songs, features, keywords, mappingFeatureToSong, mappingKeywordToSong")
 
     cursor.execute("CREATE TABLE composers("
                    "id SERIAL PRIMARY KEY,"
@@ -131,7 +92,7 @@ if __name__ == '__main__':
                    "premiered_by CHAR(100),"
                    "commissioned_by CHAR(100),"
                    "average_duration CHAR(50),"
-                   "degrees_location_relationship_occupation TEXT,"
+                   "trivia_degrees_location_relationship_occupation TEXT,"
                    "recommended_printed_source TEXT,"
                    "recommended_translation_source TEXT,"
                    "score_source TEXT,"
@@ -186,7 +147,7 @@ if __name__ == '__main__':
                                  {"premiered_by": "Premiered by"},
                                  {"commissioned_by": "Commissioned by"},
                                  {"average_duration": "Average Duration"},
-                                 {"degrees_location_relationship_occupation": "Degrees (location, relationship, occupation)"},
+                                 {"trivia_degrees_location_relationship_occupation": "Degrees (location, relationship, occupation); TRIVIA"},
                                  {"recommended_printed_source": "Recommended Printed Source"},
                                  {"recommended_translation_source": "Recommended Translation Source"},
                                  {"score_source": "Score source"},
@@ -331,3 +292,5 @@ if __name__ == '__main__':
         conn.commit()
 
     seeDataInDB(cursor)
+
+    conn.close()
